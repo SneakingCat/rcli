@@ -1,6 +1,6 @@
 name:                rcli
 version:             0.1.0.0
-synopsis:            Generic and model driven CLI operating over ReST
+synopsis:            Generic and model driven CLI remotely operating over ReST
 -- description:         
 homepage:            https://github.com/SneakingCat
 license:             GPL-3
