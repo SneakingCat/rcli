@@ -2,10 +2,11 @@
 module Control.Monad.MonadCLI (
   CLI
   , runCLI
+  , get
   ) where
 
 import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.State (MonadState, StateT, evalStateT)
+import Control.Monad.State (MonadState, StateT, evalStateT, get)
 
 -- | The monadic CLI type. Is wrapping StateT with the IO monad at the
 -- bottom

@@ -1,6 +1,7 @@
 module Main where
 
-import Control.Monad.MonadCLI
+import Control.Monad.MonadCLI (runCLI)
+import System.Console.RemoteCLI (dummyEvalLoop)
 
 main :: IO ()
-main = return ()
+main = runCLI dummyEvalLoop "% "
