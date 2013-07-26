@@ -17,6 +17,6 @@ executable rcli
   other-modules:       Control.Monad.MonadCLI
   build-depends:       base ==4.5.*
                        , mtl >= 2.0
---                       , transformers >= 0.2
+                       , transformers >= 0.2
   hs-source-dirs:      src
   ghc-options:         -Wall
