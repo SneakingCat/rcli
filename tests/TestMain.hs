@@ -1,5 +1,6 @@
 module Main where
 
+import LineParserTest
 import Test.Framework
 import Test.Framework.Providers.QuickCheck2
 
@@ -8,7 +9,7 @@ main = defaultMain tests
 
 tests :: [Test]
 tests = [
-  testGroup "Dummy tests"  [
-     testProperty "Always true" True
+  testGroup "LineParser tests"  [
+     testProperty "Equality when convering format" prop_to_then_from_string_eq
      ]
   ]
