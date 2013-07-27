@@ -1,4 +1,4 @@
-module System.Console.LineParser (
+module System.Console.RemoteCLI.LineParser (
   CommandLine (..)
   , fromString
   , toString

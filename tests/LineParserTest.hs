@@ -1,6 +1,7 @@
 module LineParserTest where
 
-import System.Console.LineParser (CommandLine (..), fromString, toString)
+import System.Console.RemoteCLI.LineParser (CommandLine (..), 
+                                            fromString, toString)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
 

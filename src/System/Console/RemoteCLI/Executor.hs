@@ -1,4 +1,4 @@
-module System.Console.RemoteCLI (
+module System.Console.RemoteCLI.Executor (
   dummyEvalLoop
   ) where
 
