@@ -19,9 +19,10 @@ test-suite rcli-tests
   hs-source-dirs:      src, tests
   ghc-options:         -Wall -fno-warn-orphans
   build-depends:       base >= 4 && < 5
-                       , test-framework >= 0.4.1
-                       , test-framework-quickcheck2 >= 0.3
-                       , QuickCheck >= 2.0
+                       , test-framework
+                       , test-framework-quickcheck2
+                       , QuickCheck
+                       , parsec
 
 executable rcli
   main-is:             Main.hs
@@ -31,7 +32,8 @@ executable rcli
   hs-source-dirs:      src
   ghc-options:         -Wall
   build-depends:       base >= 4 && < 5
-                       , mtl >= 2.0
-                       , transformers >= 0.2
-                       , readline >= 1.0
+                       , parsec
+                       , mtl
+                       , transformers
+                       , readline
 
