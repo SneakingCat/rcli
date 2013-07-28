@@ -6,9 +6,8 @@ import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
 
 instance Arbitrary CommandLine where
-  arbitrary = do
-    cmd <- identifier    
-    return (CommandLine cmd)
+  arbitrary =
+    CommandLine <$> identifier
 
 -- | Generate an identifier string
 identifier :: Gen String
