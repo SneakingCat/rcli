@@ -1,13 +1,17 @@
 module LineParserTest where
 
-import System.Console.RemoteCLI.LineParser (CommandLine (..), 
+import System.Console.RemoteCLI.LineParser (CommandLine (..), Scope (..), 
                                             fromString, toString)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
 
 instance Arbitrary CommandLine where
   arbitrary =
-    CommandLine <$> identifier
+    CommandLine <$> scope <*> identifier
+
+-- | Generate the scope tag
+scope :: Gen Scope
+scope = elements [Local, Default]
 
 -- | Generate an identifier string
 identifier :: Gen String
