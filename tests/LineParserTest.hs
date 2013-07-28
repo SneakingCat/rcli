@@ -12,13 +12,13 @@ instance Arbitrary CommandLine where
 
 -- | Generate an identifier string
 identifier :: Gen String
-identifier = (:) <$> letter <*> listOf otherIdChars
+identifier = (:) <$> beginners <*> listOf followers
   where
-    letter = oneof [choose ('a', 'z'), choose ('A', 'Z')]
-    otherIdChars = elements "0123456789_-"
+    beginners = oneof [choose ('a', 'z'), choose ('A', 'Z')]
+    followers = elements "0123456789_-"
 
 -- | The property is given a command line in the internal format. When
 -- converted to and then from the string format the result shall be
 -- equal to the original
-prop_to_then_from_string_eq :: CommandLine -> Bool
-prop_to_then_from_string_eq cl = cl == (fromString . toString) cl
+prop_conversionIsReciprocal :: CommandLine -> Bool
+prop_conversionIsReciprocal cl = cl == (fromString . toString) cl
