@@ -14,7 +14,7 @@ identifier :: Gen String
 identifier = (:) <$> beginners <*> listOf followers
   where
     beginners = oneof [choose ('a', 'z'), choose ('A', 'Z')]
-    followers = elements "0123456789_-"
+    followers = oneof [beginners, elements "0123456789_-"]
 
 -- | The property is given a command line in the internal format. When
 -- converted to and then from the string format the result shall be
