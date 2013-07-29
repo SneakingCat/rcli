@@ -2,7 +2,7 @@ module System.Console.RemoteCLI.LineParser (
   CommandLine (..)
   , Scope (..)
   , Option (..)
-  , Parameter (..)
+  , Value (..)
   , fromString
   , toString
   ) where
@@ -26,12 +26,12 @@ data Scope = Local | Default
            deriving (Show, Eq)
                     
 -- | Tag to describe an option
-data Option = Option Identifier (Maybe Parameter)
+data Option = Option Identifier (Maybe Value)
             deriving (Show, Eq)
                      
--- | A parameter to an option
-data Parameter = Null
-               deriving (Show, Eq)
+-- | A value to an option
+data Value = Null
+           deriving (Show, Eq)
 
 -- | Converts a command line string to the internal format
 fromString :: String -> CommandLine
@@ -62,11 +62,17 @@ identifier = spaces *> ((:) <$> oneOf beginners <*> many (oneOf followers))
     
 -- | Parse an options
 option :: Parser Option
-option = spaces *> (Option <$> identifier <*> optionMaybe parameter)
+option = spaces *> (Option <$> identifier <*> optionMaybe value)
     
--- | Parse a parameter
-parameter :: Parser Parameter
-parameter = try (spaces *> char '=' *> spaces *> string "Null" *> return Null)
+-- | Parse a value
+value :: Parser Value
+--parameter = try (spaces *> char '=' *> spaces *> string "Null" *> return Null)
+value = try (spaces *> char '=' *> determineValue)
+  where
+    determineValue = try vNull
+
+vNull :: Parser Value
+vNull = spaces *> string "Null" *> return Null
                     
 -- | Serialize the command line to a string
 serialize :: CommandLine -> Writer String ()

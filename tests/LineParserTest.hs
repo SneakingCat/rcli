@@ -1,7 +1,7 @@
 module LineParserTest where
 
 import System.Console.RemoteCLI.LineParser (CommandLine (..), Scope (..), 
-                                            Option (..), Parameter (..),
+                                            Option (..), Value (..),
                                             fromString, toString)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
@@ -23,11 +23,11 @@ identifier = (:) <$> beginners <*> listOf followers
 
 -- | Generate an option
 option :: Gen Option
-option = Option <$> identifier <*> parameter
+option = Option <$> identifier <*> value
     
--- | Generate a paramteter
-parameter :: Gen (Maybe Parameter)
-parameter = elements [Nothing, Just Null]
+-- | Generate a value
+value :: Gen (Maybe Value)
+value = elements [Nothing, Just Null]
 
 -- | The property is given a command line in the internal format. When
 -- converted to and then from the string format the result shall be
