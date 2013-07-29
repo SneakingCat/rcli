@@ -66,26 +66,26 @@ option = spaces *> (Option <$> identifier <*> optionMaybe value)
     
 -- | Parse a value
 value :: Parser Value
---parameter = try (spaces *> char '=' *> spaces *> string "Null" *> return Null)
-value = try (spaces *> char '=' *> determineValue)
+value = try (spaces *> char '=' *> spaces *> determineValue)
   where
     determineValue = try vNull
+                     <?> "A valid value type"
 
 vNull :: Parser Value
-vNull = spaces *> string "Null" *> return Null
+vNull = string "Null" *> return Null
                     
 -- | Serialize the command line to a string
 serialize :: CommandLine -> Writer String ()
 serialize (CommandLine s c os) = do
   serializeScope s
-  serializeId c
+  serializeIdentity c
   mapM_ serializeOption os
   where
     serializeScope Local = tell ": "
     serializeScope Default = return ()
-    serializeId s = tell $ s ++ " "
-    serializeOption (Option s p) = do
-      serializeId s
+    serializeIdentity i = tell $ i ++ " "
+    serializeOption (Option i p) = do
+      serializeIdentity i
       serializeParameter p
     serializeParameter Nothing = return ()
     serializeParameter (Just Null) = tell " = Null "
