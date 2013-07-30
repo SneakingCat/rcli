@@ -107,8 +107,9 @@ serialize (CommandLine s c os) = do
       serializeParameter p
     serializeParameter Nothing         = return ()
     serializeParameter (Just Null)     = tell "= Null" >> blank
-    serializeParameter (Just (Bool b)) = (tell $ "= " ++ show b) >> blank
-    serializeParameter (Just (Int n))  = (tell $ "= " ++ show n) >> blank
+    serializeParameter (Just (Bool b)) = assign b >> blank
+    serializeParameter (Just (Int n))  = assign n >> blank
+    assign x = tell $ "= " ++ show x
     blank = tell " "
 
 -- | Strip spaces from the end of the string
