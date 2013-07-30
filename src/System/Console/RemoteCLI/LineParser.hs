@@ -7,7 +7,7 @@ module System.Console.RemoteCLI.LineParser (
   , toString
   ) where
 
-import Text.ParserCombinators.Parsec hiding (option)
+import Text.ParserCombinators.Parsec
 import Control.Monad.Writer (Writer, execWriter, tell)
 import Data.Char (isSpace)
 import Data.List (dropWhileEnd)
@@ -47,12 +47,11 @@ toString cl = execWriter $ serialize cl
 
 -- | Top level parser for the command line
 lineParser :: Parser CommandLine
-lineParser = CommandLine <$> scope <*> identifier <*> many option
+lineParser = CommandLine <$> scope <*> identifier <*> many anOption
 
 -- | Parse the scope
 scope :: Parser Scope
-scope = spaces *> ((char ':') *> return Local
-                   <|> return Default)
+scope = spaces *> (option Default $ (char ':' *> return Local))
 
 -- | Parse an identifier
 identifier :: Parser String
@@ -61,9 +60,9 @@ identifier = spaces *> ((:) <$> oneOf beginners <*> many (oneOf followers))
     beginners = ['a'..'z'] ++ ['A'..'Z']
     followers = beginners ++ ['0'..'9'] ++ ['_', '-']
     
--- | Parse an options
-option :: Parser Option
-option = spaces *> (Option <$> identifier <*> optionMaybe value)
+-- | Parse an option
+anOption :: Parser Option
+anOption = spaces *> (Option <$> identifier <*> optionMaybe value)
     
 -- | Parse a value
 value :: Parser Value
