@@ -62,25 +62,28 @@ identifier = spaces *> ((:) <$> oneOf beginners <*> many (oneOf followers))
     
 -- | Parse an option
 anOption :: Parser Option
-anOption = spaces *> (Option <$> identifier <*> optionMaybe value)
+anOption = spaces *> (Option <$> identifier <*> value)
     
 -- | Parse a value
-value :: Parser Value
-value = try (spaces *> char '=' *> spaces *> determineValue)
+value :: Parser (Maybe Value)
+value = spaces *> ((char '=' *> determineValue)
+                   <|> return Nothing)
   where
     determineValue = try valueNull
                      <|> try valueBool
-                     <?> "A valid value type"
+                     <?> "A valid type"
 
 -- | Parsing a Null literal
-valueNull :: Parser Value
-valueNull = string "Null" *> return Null
+valueNull :: Parser (Maybe Value)
+valueNull = spaces *> string "Null" *> return (Just Null)
 
 -- | Parsing a bool literal
-valueBool :: Parser Value
-valueBool = try (string "False" *> return (Bool False))
-            <|> (string "True" *> return (Bool True))
-                    
+valueBool :: Parser (Maybe Value)
+valueBool = do
+  spaces
+  s <- (string "True" <|> string "False")
+  return (Just (Bool (read s)))
+
 -- | Serialize the command line to a string
 serialize :: CommandLine -> Writer String ()
 serialize (CommandLine s c os) = do
