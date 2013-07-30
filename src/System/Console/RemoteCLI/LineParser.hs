@@ -51,7 +51,7 @@ lineParser = CommandLine <$> scope <*> identifier <*> many option
 
 -- | Parse the scope
 scope :: Parser Scope
-scope = spaces *> (try (char ':') *> return Local
+scope = spaces *> ((char ':') *> return Local
                    <|> return Default)
 
 -- | Parse an identifier
