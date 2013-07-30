@@ -27,7 +27,11 @@ option = Option <$> identifier <*> value
     
 -- | Generate a value
 value :: Gen (Maybe Value)
-value = elements [Nothing, Just Null]
+value = oneof [valueNothing, valueNull, valueBool]
+  where
+    valueNothing = return Nothing
+    valueNull = return (Just Null)
+    valueBool = Just <$> (Bool <$> arbitrary)
 
 -- | The property is given a command line in the internal format. When
 -- converted to and then from the string format the result shall be

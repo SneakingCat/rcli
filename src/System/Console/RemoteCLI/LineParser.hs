@@ -31,6 +31,7 @@ data Option = Option Identifier (Maybe Value)
                      
 -- | A value to an option
 data Value = Null
+           | Bool Bool
            deriving (Show, Eq)
 
 -- | Converts a command line string to the internal format
@@ -68,11 +69,18 @@ option = spaces *> (Option <$> identifier <*> optionMaybe value)
 value :: Parser Value
 value = try (spaces *> char '=' *> spaces *> determineValue)
   where
-    determineValue = try vNull
+    determineValue = try valueNull
+                     <|> try valueBool
                      <?> "A valid value type"
 
-vNull :: Parser Value
-vNull = string "Null" *> return Null
+-- | Parsing a Null literal
+valueNull :: Parser Value
+valueNull = string "Null" *> return Null
+
+-- | Parsing a bool literal
+valueBool :: Parser Value
+valueBool = try (string "False" *> return (Bool False))
+            <|> (string "True" *> return (Bool True))
                     
 -- | Serialize the command line to a string
 serialize :: CommandLine -> Writer String ()
@@ -81,14 +89,16 @@ serialize (CommandLine s c os) = do
   serializeIdentity c
   mapM_ serializeOption os
   where
-    serializeScope Local = tell ": "
+    serializeScope Local   = tell ":" >> blank
     serializeScope Default = return ()
-    serializeIdentity i = tell $ i ++ " "
+    serializeIdentity i    = tell i >> blank
     serializeOption (Option i p) = do
       serializeIdentity i
       serializeParameter p
-    serializeParameter Nothing = return ()
-    serializeParameter (Just Null) = tell " = Null "
+    serializeParameter Nothing         = return ()
+    serializeParameter (Just Null)     = tell "= Null" >> blank
+    serializeParameter (Just (Bool b)) = (tell $ "= " ++ show b) >> blank
+    blank = tell " "
 
 -- | Strip spaces from the end of the string
 stripEnd :: String -> String
