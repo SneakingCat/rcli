@@ -32,6 +32,7 @@ data Option = Option Identifier (Maybe Value)
 -- | A value to an option
 data Value = Null
            | Bool Bool
+           | Int Int
            deriving (Show, Eq)
 
 -- | Converts a command line string to the internal format
@@ -71,6 +72,7 @@ value = spaces *> ((char '=' *> determineValue)
   where
     determineValue = try valueNull
                      <|> try valueBool
+                     <|> try valueInt
                      <?> "A valid type"
 
 -- | Parsing a Null literal
@@ -80,8 +82,15 @@ valueNull = spaces *> string "Null" *> return (Just Null)
 -- | Parsing a bool literal
 valueBool :: Parser (Maybe Value)
 valueBool = spaces *> 
-            (Just <$> 
-             (Bool . read) <$> (string "True" <|> string "False"))
+            (Just <$> (Bool . read) <$> (string "True" <|> string "False"))
+            
+-- | Parsing an int literal
+valueInt :: Parser (Maybe Value)
+valueInt = spaces *> (Just <$> (Int . read) <$> num)
+  where
+    num    = (:) <$> sign <*> digits
+    sign   = option ' ' (char '-')
+    digits = many1 digit
 
 -- | Serialize the command line to a string
 serialize :: CommandLine -> Writer String ()
@@ -99,6 +108,7 @@ serialize (CommandLine s c os) = do
     serializeParameter Nothing         = return ()
     serializeParameter (Just Null)     = tell "= Null" >> blank
     serializeParameter (Just (Bool b)) = (tell $ "= " ++ show b) >> blank
+    serializeParameter (Just (Int n))  = (tell $ "= " ++ show n) >> blank
     blank = tell " "
 
 -- | Strip spaces from the end of the string
