@@ -27,12 +27,15 @@ option = Option <$> identifier <*> value
     
 -- | Generate a value
 value :: Gen (Maybe Value)
-value = oneof [valueNothing, valueNull, valueBool, valueInt]
+value = oneof [valueNothing, valueNull, valueBool, valueInt, valueString]
   where
     valueNothing = return Nothing
     valueNull    = return (Just Null)
     valueBool    = Just <$> (Bool <$> arbitrary)
     valueInt     = Just <$> (Int <$> arbitrary)
+    valueString  = Just <$> (String <$> aString)
+    aString      = listOf $ oneof [choose ('a', 'z'), choose ('A', 'Z') 
+                                  , choose ('0', '9'), elements "-+/%_,."]
 
 -- | The property is given a command line in the internal format. When
 -- converted to and then from the string format the result shall be
