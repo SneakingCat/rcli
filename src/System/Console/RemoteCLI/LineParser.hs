@@ -79,10 +79,9 @@ valueNull = spaces *> string "Null" *> return (Just Null)
 
 -- | Parsing a bool literal
 valueBool :: Parser (Maybe Value)
-valueBool = do
-  spaces
-  s <- (string "True" <|> string "False")
-  return (Just (Bool (read s)))
+valueBool = spaces *> 
+            (Just <$> 
+             (Bool . read) <$> (string "True" <|> string "False"))
 
 -- | Serialize the command line to a string
 serialize :: CommandLine -> Writer String ()
