@@ -16,4 +16,4 @@ newtype CLI s a = CLI {
              
 -- | Run the CLI monad, leaving only the IO a part left
 runCLI :: CLI s a -> s -> IO a
-runCLI m s = evalStateT (extractCLI m) s
+runCLI m = evalStateT (extractCLI m)

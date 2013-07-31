@@ -53,14 +53,14 @@ lineParser = CommandLine <$> scope <*> identifier <*> many anOption
 
 -- | Parse the scope
 scope :: Parser Scope
-scope = spaces *> (option Default $ (char ':' *> return Local))
+scope = spaces *> option Default (char ':' *> return Local)
 
 -- | Parse an identifier
 identifier :: Parser String
 identifier = spaces *> ((:) <$> oneOf beginners <*> many (oneOf followers))
   where
     beginners = ['a'..'z'] ++ ['A'..'Z']
-    followers = beginners ++ ['0'..'9'] ++ ['_', '-']
+    followers = beginners ++ ['0'..'9'] ++ "_-"
     
 -- | Parse an option
 anOption :: Parser Option
@@ -97,7 +97,7 @@ valueInt = spaces *> (Just <$> (Int . read) <$> num)
 -- | Parsing a string literal
 valueString :: Parser (Maybe Value)
 valueString =  spaces *>
-               (Just <$> String <$> between quote quote (many $ noneOf ['\"']))
+               (Just <$> String <$> between quote quote (many $ noneOf "\""))
   where
     quote = char '\"'
 

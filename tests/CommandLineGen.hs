@@ -3,8 +3,7 @@ module CommandLineGen (
   ) where
 
 import System.Console.RemoteCLI.CommandLine (CommandLine (..), Scope (..), 
-                                             Option (..), Value (..),
-                                             fromString, toString)
+                                             Option (..), Value (..))
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
 
