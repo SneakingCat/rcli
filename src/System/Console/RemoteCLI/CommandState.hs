@@ -3,6 +3,7 @@ module System.Console.RemoteCLI.CommandState (
   CommandState (..)
   , MonadicCommandHandler
   , PureCommandHandler
+  , empty
   ) where
 
 import System.Console.RemoteCLI.CommandLine (CommandLine, Value)
@@ -34,3 +35,12 @@ type PureCommandHandler = CommandLine -> CommandState ->
 instance Show PureCommandHandler where
   show _ = "CommandLine -> CommandState -> "
            ++ "Either String (CommandState, MonadicCommandHandler)"
+           
+-- | Create the empty state
+empty :: CommandState
+empty = CommandState {
+  variables = M.empty
+  , localCommands = M.empty
+  , remoteCommands = M.empty
+  , defaultScope = M.empty
+  }

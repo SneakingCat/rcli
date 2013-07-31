@@ -14,6 +14,6 @@ tests = [
      testProperty "Equality when converting formats" prop_conversionIsReciprocal
      ]
   , testGroup "CommandHandler tests" [
-     testProperty "Dummy" prop_dummy
+     testProperty "Command not found on empty state" prop_commandNotFoundOnEmpty
      ]
   ]
