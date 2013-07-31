@@ -1,4 +1,4 @@
-module System.Console.RemoteCLI.LineParser (
+module System.Console.RemoteCLI.CommandLine (
   CommandLine (..)
   , Scope (..)
   , Option (..)

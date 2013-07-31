@@ -1,8 +1,8 @@
-module LineParserTest where
+module CommandLineTest where
 
-import System.Console.RemoteCLI.LineParser (CommandLine (..), Scope (..), 
-                                            Option (..), Value (..),
-                                            fromString, toString)
+import System.Console.RemoteCLI.CommandLine (CommandLine (..), Scope (..), 
+                                             Option (..), Value (..),
+                                             fromString, toString)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
 

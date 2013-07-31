@@ -1,6 +1,6 @@
 module Main where
 
-import LineParserTest
+import CommandLineTest
 import Test.Framework
 import Test.Framework.Providers.QuickCheck2
 
@@ -9,7 +9,7 @@ main = defaultMain tests
 
 tests :: [Test]
 tests = [
-  testGroup "LineParser tests"  [
+  testGroup "CommandLine tests"  [
      testProperty "Equality when converting formats" prop_conversionIsReciprocal
      ]
   ]
