@@ -18,15 +18,16 @@ evalLoop = do
   maybeLine <- liftIO $ readline prompt
   case maybeLine of
     Nothing   -> return () -- Ctrl^D is hit, just terminate
-    Just line -> do
-      liftIO $ addHistory line
-      let result = do
-            commandLine <- fromString line
-            pureHandler <- lookupHandler commandLine state
-            pureHandler commandLine state
-      case result of
-        Left err -> liftIO $ putStrLn err
-        Right (state', monadicHandler) -> do
-          put state'          
-      evalLoop
-
+    Just line 
+      | null line -> evalLoop -- Empty line, just quit the rest
+      | otherwise -> do
+        liftIO $ addHistory line
+        let result = do
+              commandLine <- fromString line
+              pureHandler <- lookupHandler commandLine state
+              pureHandler commandLine state
+        case result of
+          Left err -> liftIO $ putStrLn err
+          Right (state', monadicHandler) -> do
+            put state'          
+  evalLoop
