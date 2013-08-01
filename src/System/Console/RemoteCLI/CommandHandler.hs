@@ -4,12 +4,12 @@ import System.Console.RemoteCLI.CommandLine
 import System.Console.RemoteCLI.CommandState
 import qualified Data.Map.Strict as M
 
--- | Apply the pure handler for the given command line
-applyPureHandler :: PureCommandHandler
-applyPureHandler cl@(CommandLine scope cmd opt) state =
+-- | Lookup the pure handler for the given command line
+lookupHandler :: CommandLine -> CommandState -> Either String PureCommandHandler
+lookupHandler cl@(CommandLine scope cmd opt) state =
   case M.lookup cmd (select scope) of
-    Nothing -> Left $ "Command " ++ (show cmd) ++ " not found"
-    Just h  -> h cl state
+    Nothing       -> Left $ "Command " ++ (show cmd) ++ " not found"
+    Just handler  -> Right handler
     where
       select Local = localCommands state
       select _     = defaultScope state
