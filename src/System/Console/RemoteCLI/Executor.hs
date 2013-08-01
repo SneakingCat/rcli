@@ -29,5 +29,10 @@ evalLoop = do
         case result of
           Left err -> liftIO $ putStrLn err
           Right (state', monadicHandler) -> do
-            put state'          
+            put state' -- Update the state from the pure handler
+            result' <- liftIO $ monadicHandler state'
+            case result' of
+              Left err -> liftIO $ putStrLn err
+              Right state'' ->
+                put state''                
   evalLoop
