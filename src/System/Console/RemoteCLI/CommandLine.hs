@@ -18,7 +18,6 @@ type Identifier = String
 -- | Algebraic data structure representing the internal format,
 -- i.e. parsed, of the command line
 data CommandLine = CommandLine Scope Identifier [Option]
-                 | ErroneousLine String
                  deriving (Show, Eq)
 
 -- | Tag to tell whether the local or the default scope is requested
@@ -37,11 +36,11 @@ data Value = Null
            deriving (Show, Eq)
 
 -- | Converts a command line string to the internal format
-fromString :: String -> CommandLine
+fromString :: String -> Either String CommandLine
 fromString s = 
   case runParser lineParser () "" (stripEnd s) of
-    Right commandLine -> commandLine
-    Left _            -> ErroneousLine "FEL"
+    Right commandLine -> Right commandLine
+    Left e            -> Left (show e)
 
 -- | Converts the internal format to a string
 toString :: CommandLine -> String
