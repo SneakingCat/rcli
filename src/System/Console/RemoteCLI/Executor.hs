@@ -22,17 +22,23 @@ evalLoop = do
       | null line -> evalLoop -- Empty line, just quit the rest
       | otherwise -> do
         liftIO $ addHistory line
-        let result = do
-              commandLine <- fromString line
-              pureHandler <- lookupHandler commandLine state
-              pureHandler commandLine state
-        case result of
-          Left err -> liftIO $ putStrLn err
+        case (applyPureHandler line state) of
+          Left err -> out err
           Right (state', monadicHandler) -> do
-            put state' -- Update the state from the pure handler
             result' <- liftIO $ monadicHandler state'
             case result' of
-              Left err -> liftIO $ putStrLn err
+              Left err -> out err
               Right state'' ->
                 put state''                
   evalLoop
+  where
+    out = liftIO . putStrLn
+  
+applyPureHandler :: String -> CommandState ->
+                    Either String (CommandState, MonadicCommandHandler)
+applyPureHandler line state = do
+  commandLine <- fromString line
+  pureHandler <- lookupHandler commandLine state
+  pureHandler commandLine state
+
+  
