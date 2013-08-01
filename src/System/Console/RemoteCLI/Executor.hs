@@ -32,10 +32,10 @@ evalLoop = do
                 put state''                
   evalLoop
   where
-    out = liftIO . putStrLn
+    out = liftIO . mapM_ putStrLn
   
 applyPureHandler :: String -> CommandState ->
-                    Either String (CommandState, MonadicCommandHandler)
+                    Either [String] (CommandState, MonadicCommandHandler)
 applyPureHandler line state = do
   commandLine <- fromString line
   pureHandler <- lookupHandler commandLine state

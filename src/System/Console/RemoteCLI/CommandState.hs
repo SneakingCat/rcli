@@ -24,13 +24,13 @@ data CommandState = CommandState {
 -- | A monadic function to take care of the 'dirty' aspects of command
 -- execution. E.g. I/O
 type MonadicCommandHandler = CommandState -> 
-                             IO (Either String CommandState)
+                             IO (Either [String] CommandState)
 
 -- | A pure function to take care of the 'pure' aspects of command
 -- execution. E.g. indata checking, state manipulation and preparation
 -- of a monadic handler
 type PureCommandHandler = CommandLine -> CommandState -> 
-                          Either String (CommandState, MonadicCommandHandler)
+                          Either [String] (CommandState, MonadicCommandHandler)
                           
 instance Show PureCommandHandler where
   show _ = "CommandLine -> CommandState -> "

@@ -10,8 +10,8 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..))
 prop_commandNotFoundOnEmpty :: CommandLine -> Bool
 prop_commandNotFoundOnEmpty cl =
   case lookupHandler cl empty of
-    Left err -> err == "Command " ++ show (name cl) ++ " not found"
-    _        -> False
+    Left [err] -> err == "Command " ++ show (name cl) ++ " not found"
+    _          -> False
     where
       name (CommandLine _ n _) = n
 

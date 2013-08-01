@@ -36,11 +36,11 @@ data Value = Null
            deriving (Show, Eq)
 
 -- | Converts a command line string to the internal format
-fromString :: String -> Either String CommandLine
+fromString :: String -> Either [String] CommandLine
 fromString s = 
   case runParser lineParser () "" (stripEnd s) of
     Right commandLine -> Right commandLine
-    Left e            -> Left (show e)
+    Left e            -> Left $ lines (show e)
 
 -- | Converts the internal format to a string
 toString :: CommandLine -> String
