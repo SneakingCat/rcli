@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 module System.Console.RemoteCLI.CommandState (
   CommandState (..)
+  , Printout
   , MonadicCommandHandler
   , PureCommandHandler
   , empty
@@ -21,20 +22,26 @@ data CommandState = CommandState {
   , defaultScope   :: M.Map String PureCommandHandler
   } deriving Show
              
+-- | The "Printout" type for the CLI, i.e. the content that will be
+-- displayed by the eval loop
+type Printout = [String]             
+             
 -- | A monadic function to take care of the 'dirty' aspects of command
--- execution. E.g. I/O
+-- execution. E.g. network communication
 type MonadicCommandHandler = CommandState -> 
-                             IO (Either [String] CommandState)
+                             IO (Either Printout (Printout, CommandState))
 
 -- | A pure function to take care of the 'pure' aspects of command
 -- execution. E.g. indata checking, state manipulation and preparation
--- of a monadic handler
+-- of the monadic handler
 type PureCommandHandler = CommandLine -> CommandState -> 
-                          Either [String] (CommandState, MonadicCommandHandler)
+                          Either Printout (Printout
+                                          , CommandState
+                                          , MonadicCommandHandler)
                           
 instance Show PureCommandHandler where
   show _ = "CommandLine -> CommandState -> "
-           ++ "Either String (CommandState, MonadicCommandHandler)"
+           ++ "Either Printout (Printout, CommandState, MonadicCommandHandler)"
            
 -- | Create the empty state
 empty :: CommandState
