@@ -1,16 +1,18 @@
 module CommandHandlerTest where
 
+import CommandLineGen
 import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , Printout
+                                              , PureCommandHandler
                                               , MonadicCommandHandler
                                               , lookupHandler
-                                              , empty
                                               , fromList)
 import System.Console.RemoteCLI.CommandHandler (localHandlers)
-import System.Console.RemoteCLI.CommandLine (CommandLine (..), Scope (..))
+import System.Console.RemoteCLI.CommandLine (CommandLine (..)
+                                             , Scope (..)
+                                             , Value)
 import Test.QuickCheck
-import Control.Applicative ((<$>), (<*>))
-import qualified Data.Map.Strict as M
+import Control.Applicative ((<$>), (<*>), pure)
 
 data OnlyHelp = OnlyHelp CommandLine CommandState
               deriving Show
@@ -34,12 +36,24 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
 -- the others are generated dummies
 stateWithLocal :: String -> Gen CommandState
 stateWithLocal cmd = 
-  CommandState <$> variables <*> locals <*> remotes <*> locals
+  let variables = fromList <$> listOf variable
+      locals    = fromList <$> ((:) <$> realHandler <*> dummyHandlers)
+      remotes   = fromList <$> dummyHandlers
+  in CommandState <$> variables <*> locals <*> remotes <*> locals
   where
-    variables = return (fromList [])
-    locals    = return (fromList localHandlers)
-    remotes   = return (fromList [])
-    
+    realHandler = case lookup cmd localHandlers of
+      Just h  -> return (cmd, h)
+      Nothing -> error $ "Cannot find handler " ++ cmd
+    dummyHandlers = filter (\(x, _) -> x /= cmd) <$> listOf handler
+
+-- | Generate a variable
+variable :: Gen (String, Value)
+variable = (,) <$> identifier <*> value
+
+-- | Generate a handler
+handler :: Gen (String, PureCommandHandler)
+handler = (,) <$> identifier <*> pure dummyHandler
+
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 
                     Either Printout (Printout
@@ -48,5 +62,9 @@ applyPureHandler :: CommandLine -> CommandState ->
 applyPureHandler commandLine state = do
   pureHandler <- lookupHandler commandLine state
   pureHandler commandLine state
+  
+-- | A dummy command handler. Shall never be executed
+dummyHandler :: PureCommandHandler
+dummyHandler _ _ = error "Dummy handler. Shall never be called."
     
 

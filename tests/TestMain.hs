@@ -17,4 +17,7 @@ tests = [
   , testGroup "CommandState tests" [
      testProperty "Command not found on empty state" prop_commandNotFoundOnEmpty
      ]
+  , testGroup "CommandHandler tests" [
+     testProperty "Help shall display all commands" prop_helpShallDisplayAllCommands
+     ]
   ]

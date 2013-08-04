@@ -1,5 +1,7 @@
 module CommandLineGen (
   arbitrary
+  , identifier
+  , value
   ) where
 
 import System.Console.RemoteCLI.CommandLine (CommandLine (..), Scope (..), 

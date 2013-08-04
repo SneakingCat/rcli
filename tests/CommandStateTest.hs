@@ -1,8 +1,7 @@
 module CommandStateTest where
 
 import CommandLineGen ()
-import System.Console.RemoteCLI.CommandState (CommandState
-                                              , lookupHandler
+import System.Console.RemoteCLI.CommandState (lookupHandler
                                               , empty)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..))
 

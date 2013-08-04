@@ -5,7 +5,6 @@ module System.Console.RemoteCLI.Executor (
 
 import System.Console.RemoteCLI.CommandLine
 import System.Console.RemoteCLI.CommandState
-import System.Console.RemoteCLI.CommandHandler
 import Control.Monad.MonadCLI (CLI, get, put)
 import Control.Monad.IO.Class (liftIO)
 import System.Console.Readline (readline, addHistory)
