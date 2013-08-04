@@ -32,8 +32,7 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
 -- | Help function to create a state where the given command is real,
 -- the others are generated dummies
 stateWithLocal :: String -> Gen CommandState
-stateWithLocal _ = return empty {localCommands = M.fromList localHandlers
-                                , defaultScope = M.fromList localHandlers}
+stateWithLocal _ = return empty
     
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 

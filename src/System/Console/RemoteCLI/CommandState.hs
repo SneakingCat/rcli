@@ -15,17 +15,15 @@ import Text.Printf (printf)
 import qualified Data.Map.Strict as M
 
 -- | The state for the CLI
-data CommandState = CommandState {
-  -- | Variables for use with the CLI
-  variables        :: M.Map String Value
-  -- | Locally defined, intrinsic, commands for the CLI
-  , localCommands  :: M.Map String PureCommandHandler
-  -- | Remotely defined commands
-  , remoteCommands :: M.Map String PureCommandHandler
-  -- | Defined to the remoteCommands if defined, else localCommands
-  , defaultScope   :: M.Map String PureCommandHandler
-  } deriving Show
-             
+type VariableMap       = M.Map String Value
+type CommandHandlerMap = M.Map String PureCommandHandler
+
+data CommandState = CommandState VariableMap       -- Variables
+                                 CommandHandlerMap -- Local commands
+                                 CommandHandlerMap -- Remote command
+                                 CommandHandlerMap -- Default scope
+                  deriving Show
+
 -- | The "Printout" type for the CLI, i.e. the content that will be
 -- displayed by the eval loop
 type Printout = [String]             
@@ -50,19 +48,14 @@ instance Show PureCommandHandler where
 -- | Lookup the pure handler for the given command line
 lookupHandler :: CommandLine -> CommandState -> 
                  Either [String] PureCommandHandler
-lookupHandler (CommandLine scope cmd _) state =
+lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
   case M.lookup cmd (select scope) of
     Nothing       -> Left [printf "Command \"%s\" not found" cmd]
     Just handler  -> Right handler
     where
-      select Local = localCommands state
-      select _     = defaultScope state           
+      select Local = local
+      select _     = deflt
            
 -- | Create the empty state
 empty :: CommandState
-empty = CommandState {
-  variables = M.empty
-  , localCommands = M.empty
-  , remoteCommands = M.empty
-  , defaultScope = M.empty
-  }
+empty = CommandState M.empty M.empty M.empty M.empty
