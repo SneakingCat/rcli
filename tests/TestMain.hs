@@ -1,6 +1,7 @@
 module Main where
 
 import CommandLineTest
+import CommandStateTest
 import CommandHandlerTest
 import Test.Framework
 import Test.Framework.Providers.QuickCheck2
@@ -13,7 +14,7 @@ tests = [
   testGroup "CommandLine tests"  [
      testProperty "Equality when converting formats" prop_fromAndToShallBeEqual
      ]
-  , testGroup "CommandHandler tests" [
+  , testGroup "CommandState tests" [
      testProperty "Command not found on empty state" prop_commandNotFoundOnEmpty
      ]
   ]

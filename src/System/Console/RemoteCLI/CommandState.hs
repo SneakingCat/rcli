@@ -4,10 +4,14 @@ module System.Console.RemoteCLI.CommandState (
   , Printout
   , MonadicCommandHandler
   , PureCommandHandler
+  , lookupHandler
   , empty
   ) where
 
-import System.Console.RemoteCLI.CommandLine (CommandLine, Value)
+import System.Console.RemoteCLI.CommandLine (CommandLine (..)
+                                             , Scope (..)
+                                             , Value)
+import Text.Printf (printf)
 import qualified Data.Map.Strict as M
 
 -- | The state for the CLI
@@ -42,6 +46,17 @@ type PureCommandHandler = CommandLine -> CommandState ->
 instance Show PureCommandHandler where
   show _ = "CommandLine -> CommandState -> "
            ++ "Either Printout (Printout, CommandState, MonadicCommandHandler)"
+           
+-- | Lookup the pure handler for the given command line
+lookupHandler :: CommandLine -> CommandState -> 
+                 Either [String] PureCommandHandler
+lookupHandler (CommandLine scope cmd _) state =
+  case M.lookup cmd (select scope) of
+    Nothing       -> Left [printf "Command \"%s\" not found" cmd]
+    Just handler  -> Right handler
+    where
+      select Local = localCommands state
+      select _     = defaultScope state           
            
 -- | Create the empty state
 empty :: CommandState

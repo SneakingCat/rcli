@@ -1,11 +1,11 @@
 module CommandHandlerTest where
 
-import CommandLineGen ()
 import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , Printout
                                               , MonadicCommandHandler
+                                              , lookupHandler
                                               , empty)
-import System.Console.RemoteCLI.CommandHandler (lookupHandler, localHandlers)
+import System.Console.RemoteCLI.CommandHandler (localHandlers)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..), Scope (..))
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>))
@@ -18,16 +18,6 @@ instance Arbitrary OnlyHelp where
   arbitrary = OnlyHelp <$> elements [CommandLine Local "help" []
                                     , CommandLine Default "help" []]
                        <*> stateWithLocal "help"
-
--- | When the state is empty, the string "Command "X" not found"
--- always shall be returned when looking up the handle
-prop_commandNotFoundOnEmpty :: CommandLine -> Bool
-prop_commandNotFoundOnEmpty commandLine =
-  case lookupHandler commandLine empty of
-    Left [err] -> err == "Command " ++ show (name commandLine) ++ " not found"
-    _          -> False
-    where
-      name (CommandLine _ n _) = n
       
 -- | The help command, when not given any further argument, shall
 -- display each registered command on a separate line. The printout
