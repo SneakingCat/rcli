@@ -6,6 +6,7 @@ module System.Console.RemoteCLI.CommandState (
   , PureCommandHandler
   , lookupHandler
   , empty
+  , fromList
   ) where
 
 import System.Console.RemoteCLI.CommandLine (CommandLine (..)
@@ -59,3 +60,8 @@ lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
 -- | Create the empty state
 empty :: CommandState
 empty = CommandState M.empty M.empty M.empty M.empty
+
+-- | Create a map from list (ugly kind of module export :-( )
+fromList :: [(String, a)] -> M.Map String a
+fromList = M.fromList
+             

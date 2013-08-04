@@ -4,7 +4,8 @@ import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , Printout
                                               , MonadicCommandHandler
                                               , lookupHandler
-                                              , empty)
+                                              , empty
+                                              , fromList)
 import System.Console.RemoteCLI.CommandHandler (localHandlers)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..), Scope (..))
 import Test.QuickCheck
@@ -32,7 +33,12 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
 -- | Help function to create a state where the given command is real,
 -- the others are generated dummies
 stateWithLocal :: String -> Gen CommandState
-stateWithLocal _ = return empty
+stateWithLocal cmd = 
+  CommandState <$> variables <*> locals <*> remotes <*> locals
+  where
+    variables = return (fromList [])
+    locals    = return (fromList localHandlers)
+    remotes   = return (fromList [])
     
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 

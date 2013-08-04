@@ -24,16 +24,18 @@ identifier = (:) <$> beginners <*> listOf followers
 
 -- | Generate an option
 option :: Gen Option
-option = Option <$> identifier <*> value
+option = Option <$> identifier <*> maybeValue
     
--- | Generate a value
-value :: Gen (Maybe Value)
-value = oneof [valueNothing, valueNull, valueBool, valueInt, valueString]
-  where
-    valueNothing = return Nothing
-    valueNull    = return (Just Null)
-    valueBool    = Just <$> (Bool <$> arbitrary)
-    valueInt     = Just <$> (Int <$> arbitrary)
-    valueString  = Just <$> (String <$> aString)
-    aString      = listOf $ oneof [choose ('a', 'z'), choose ('A', 'Z') 
-                                  , choose ('0', '9'), elements "-+/%_,."]
+-- Generate a value         
+value :: Gen Value
+value = oneof [return Null, Bool <$> arbitrary
+              , Int <$> arbitrary, String <$> asciiString]
+
+-- | Generate a maybe value
+maybeValue :: Gen (Maybe Value)
+maybeValue = oneof [return Nothing, Just <$> value]
+                   
+-- | Generate an ascii string with the expected character set             
+asciiString :: Gen String
+asciiString = listOf $ oneof [choose ('a', 'z'), choose ('A', 'Z') 
+                             , choose ('0', '9'), elements "-+/%_,."]
