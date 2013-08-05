@@ -14,9 +14,12 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
 
+-- | Data type describing the help command, without any arguments to
+-- help
 data OnlyHelp = OnlyHelp CommandLine CommandState
               deriving Show
 
+-- | Arbitrary generator for the OnlyHelp data type
 instance Arbitrary OnlyHelp where
   arbitrary = OnlyHelp <$> elements [CommandLine Local "help" []
                                     , CommandLine Default "help" []]
