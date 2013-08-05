@@ -24,7 +24,7 @@ test-suite rcli-tests
                        , QuickCheck
                        , parsec
                        , mtl
-                       , containers
+                       , containers >= 0.5
 
 executable rcli
   main-is:             Main.hs
@@ -38,5 +38,5 @@ executable rcli
                        , mtl
                        , transformers
                        , readline
-                       , containers
+                       , containers >= 0.5
 
