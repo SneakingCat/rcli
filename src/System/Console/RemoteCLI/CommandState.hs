@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 module System.Console.RemoteCLI.CommandState (
   CommandState (..)
+  , Synopsis
   , Printout
   , MonadicCommandHandler
   , PureCommandHandler
@@ -18,8 +19,9 @@ import Text.Printf (printf)
 import qualified Data.Map.Strict as M
 
 -- | The state for the CLI
+type Synopsis          = String
 type VariableMap       = M.Map String Value
-type CommandHandlerMap = M.Map String PureCommandHandler
+type CommandHandlerMap = M.Map String (Synopsis, PureCommandHandler)
 
 data CommandState = CommandState VariableMap       -- Variables
                                  CommandHandlerMap -- Local commands
@@ -57,17 +59,19 @@ lookupHandler :: CommandLine -> CommandState ->
                  Either [String] PureCommandHandler
 lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
   case M.lookup cmd (select scope) of
-    Nothing       -> Left [printf "Command \"%s\" not found" cmd]
-    Just handler  -> Right handler
+    Nothing           -> Left [printf "Command \"%s\" not found" cmd]
+    Just (_, handler) -> Right handler
     where
       select Local = local
       select _     = deflt
            
-localCommands :: CommandState -> [String]            
-localCommands (CommandState _ l _ _) = M.keys l
+localCommands :: CommandState -> 
+                 [(String, (Synopsis, PureCommandHandler))]     
+localCommands (CommandState _ l _ _) = M.toAscList l
 
-remoteCommands :: CommandState -> [String]
-remoteCommands (CommandState _ _ r _) = M.keys r
+remoteCommands :: CommandState -> 
+                  [(String, (Synopsis, PureCommandHandler))]
+remoteCommands (CommandState _ _ r _) = M.toAscList r
       
 -- | Create the empty state
 empty :: CommandState

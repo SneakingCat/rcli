@@ -2,6 +2,7 @@ module CommandHandlerTest where
 
 import CommandLineGen
 import System.Console.RemoteCLI.CommandState (CommandState (..)
+                                              , Synopsis
                                               , Printout
                                               , PureCommandHandler
                                               , MonadicCommandHandler
@@ -15,7 +16,8 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
                                              , Value)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
-import Data.List (sort)
+import Data.List (sortBy)
+import Text.Printf (printf)
 
 -- | Data type describing the help command, without any arguments to
 -- help
@@ -36,16 +38,24 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
       -- The first row shall read
       x == "The available commands are:"
       
-      -- The rest of the rows shall contain all registered
-      -- commands. First the locals and then the remotes. The command
-      -- list shall be sorted 
-      && xs == (sort $ localCommands state)++(sort $ remoteCommands state)
+      -- The rest of the rows shall contain all registered commands
+      -- with their synopsis. First the locals and then the
+      -- remotes. The command list shall be sorted ascending on the
+      -- command name
+      && xs == (sorted $ localCommands state)
+                ++(sorted $ remoteCommands state)
 
       -- State shall not have been modified
       && state' == state
       
       -- Fail when applying the handler
-    Left _ -> False
+    Right ([], _, _) -> False
+    Left _           -> False
+    where
+      --sorted :: [(a, b, c)] -> [String]
+      sorted = map toLine . sortBy key
+      key c1 c2 = fst c1 `compare` fst c2
+      toLine (c, (s, _)) = printf "%-20s%s" c s
     
 -- | Help function to create a state where the given command is real,
 -- the others are generated dummies
@@ -57,7 +67,7 @@ stateWithLocal cmd =
   in CommandState <$> variables <*> locals <*> remotes <*> locals
   where
     realHandler = case lookup cmd localHandlers of
-      Just h  -> return (cmd, h)
+      Just (s, h)  -> return (cmd, (s, h))
       Nothing -> error $ "Cannot find handler " ++ cmd
     dummyHandlers = filter (\(x, _) -> x /= cmd) <$> listOf handler
 
@@ -66,8 +76,8 @@ variable :: Gen (String, Value)
 variable = (,) <$> identifier <*> value
 
 -- | Generate a handler
-handler :: Gen (String, PureCommandHandler)
-handler = (,) <$> identifier <*> pure dummyHandler
+handler :: Gen (String, (Synopsis, PureCommandHandler))
+handler = (,) <$> identifier <*> ((,) <$> arbitrary <*> pure dummyHandler)
 
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 
