@@ -6,6 +6,8 @@ import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , PureCommandHandler
                                               , MonadicCommandHandler
                                               , lookupHandler
+                                              , localCommands
+                                              , remoteCommands
                                               , fromList)
 import System.Console.RemoteCLI.CommandHandler (localHandlers)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..)
@@ -13,6 +15,7 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
                                              , Value)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
+import Data.List (sort)
 
 -- | Data type describing the help command, without any arguments to
 -- help
@@ -25,15 +28,23 @@ instance Arbitrary OnlyHelp where
                                     , CommandLine Default "help" []]
                        <*> stateWithLocal "help"
       
--- | The help command, when not given any further argument, shall
--- display each registered command on a separate line. The printout
--- header shall be on the first line and say: "The available commands
--- are:"
+-- | The help command, not given any further argument
 prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool
 prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
   case applyPureHandler commandLine state of
-    Right (x:xs, state', _) -> x == "The available commands are:"
-                               && state' == state
+    Right (x:xs, state', _) -> 
+      -- The first row shall read
+      x == "The available commands are:"
+      
+      -- The rest of the rows shall contain all registered
+      -- commands. First the locals and then the remotes. The command
+      -- list shall be sorted 
+      && xs == (sort $ localCommands state)++(sort $ remoteCommands state)
+
+      -- State shall not have been modified
+      && state' == state
+      
+      -- Fail when applying the handler
     Left _ -> False
     
 -- | Help function to create a state where the given command is real,

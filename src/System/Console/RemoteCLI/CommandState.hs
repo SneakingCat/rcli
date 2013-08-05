@@ -5,6 +5,8 @@ module System.Console.RemoteCLI.CommandState (
   , MonadicCommandHandler
   , PureCommandHandler
   , lookupHandler
+  , localCommands
+  , remoteCommands
   , empty
   , fromList
   ) where
@@ -42,8 +44,11 @@ type PureCommandHandler = CommandLine -> CommandState ->
                                           , CommandState
                                           , MonadicCommandHandler)
                           
+-- | Type class Eq instance
 instance Eq PureCommandHandler where
   _ == _ = True
+  
+-- | Type class Show instance
 instance Show PureCommandHandler where
   show _ = "PureCommandHandler"  
            
@@ -58,6 +63,12 @@ lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
       select Local = local
       select _     = deflt
            
+localCommands :: CommandState -> [String]            
+localCommands (CommandState _ l _ _) = M.keys l
+
+remoteCommands :: CommandState -> [String]
+remoteCommands (CommandState _ _ r _) = M.keys r
+      
 -- | Create the empty state
 empty :: CommandState
 empty = CommandState M.empty M.empty M.empty M.empty
