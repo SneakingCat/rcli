@@ -23,7 +23,7 @@ data CommandState = CommandState VariableMap       -- Variables
                                  CommandHandlerMap -- Local commands
                                  CommandHandlerMap -- Remote command
                                  CommandHandlerMap -- Default scope
-                  deriving Show
+                  deriving (Eq, Show)
 
 -- | The "Printout" type for the CLI, i.e. the content that will be
 -- displayed by the eval loop
@@ -42,9 +42,10 @@ type PureCommandHandler = CommandLine -> CommandState ->
                                           , CommandState
                                           , MonadicCommandHandler)
                           
+instance Eq PureCommandHandler where
+  _ == _ = True
 instance Show PureCommandHandler where
-  show _ = "CommandLine -> CommandState -> "
-           ++ "Either Printout (Printout, CommandState, MonadicCommandHandler)"
+  show _ = "PureCommandHandler"  
            
 -- | Lookup the pure handler for the given command line
 lookupHandler :: CommandLine -> CommandState -> 

@@ -32,8 +32,8 @@ instance Arbitrary OnlyHelp where
 prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool
 prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
   case applyPureHandler commandLine state of
+    Right (x:xs, state', _) -> state' == state
     Left _ -> False
-    Right _ -> True
     
 -- | Help function to create a state where the given command is real,
 -- the others are generated dummies
