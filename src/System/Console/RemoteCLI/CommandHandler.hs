@@ -10,7 +10,8 @@ localHandlers :: [(String, PureCommandHandler)]
 localHandlers = [("help", pureHelpHandler)]
 
 pureHelpHandler :: PureCommandHandler
-pureHelpHandler _ state = Right (["eee"], state, monadicDoNothingHandler)
+pureHelpHandler _ state = Right (["The available commands are:"]
+                                  , state, monadicDoNothingHandler)
 
 -- | A monadic command handler that return the empty printout and the
 -- same state as given as input
