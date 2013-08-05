@@ -52,9 +52,8 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
     Right ([], _, _) -> False
     Left _           -> False
     where
-      --sorted :: [(a, b, c)] -> [String]
-      sorted = map toLine . sortBy key
-      key c1 c2 = fst c1 `compare` fst c2
+      sorted             = map toLine . sortBy key
+      key c1 c2          = fst c1 `compare` fst c2
       toLine (c, (s, _)) = printf "%-20s%s" c s
     
 -- | Help function to create a state where the given command is real,
@@ -91,5 +90,3 @@ applyPureHandler commandLine state = do
 -- | A dummy command handler. Shall never be executed
 dummyHandler :: PureCommandHandler
 dummyHandler _ _ = error "Dummy handler. Shall never be called."
-    
-
