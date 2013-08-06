@@ -2,6 +2,7 @@
 module System.Console.RemoteCLI.CommandState (
   CommandState (..)
   , Synopsis
+  , CommandHandlerEntry
   , Printout
   , MonadicCommandHandler
   , PureCommandHandler
@@ -18,11 +19,20 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
 import Text.Printf (printf)
 import qualified Data.Map.Strict as M
 
--- | The state for the CLI
-type Synopsis          = String
-type VariableMap       = M.Map String Value
-type CommandHandlerMap = M.Map String (Synopsis, PureCommandHandler)
+-- | Alias for a string shortly describing the intention for a command
+type Synopsis            = String
 
+-- | A map from strings to values
+type VariableMap         = M.Map String Value
+
+-- | A map from strings to command handlers
+type CommandHandlerMap   = M.Map String (Synopsis, PureCommandHandler)
+
+-- | A command handler entry as it will look like when dumping the
+-- contents of a command handler map
+type CommandHandlerEntry = (String, (Synopsis, PureCommandHandler))
+
+-- | The state for the CLI
 data CommandState = CommandState VariableMap       -- Variables
                                  CommandHandlerMap -- Local commands
                                  CommandHandlerMap -- Remote command
@@ -54,7 +64,8 @@ instance Eq PureCommandHandler where
 instance Show PureCommandHandler where
   show _ = "PureCommandHandler"  
            
--- | Lookup the pure handler for the given command line
+-- | Lookup the pure handler for the given command line and its
+-- selected scope
 lookupHandler :: CommandLine -> CommandState -> 
                  Either [String] PureCommandHandler
 lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
@@ -65,12 +76,14 @@ lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
       select Local = local
       select _     = deflt
            
-localCommands :: CommandState -> 
-                 [(String, (Synopsis, PureCommandHandler))]     
+-- | Dump the contents of the local commands. Sorted in ascending
+-- order based on key
+localCommands :: CommandState -> [CommandHandlerEntry]     
 localCommands (CommandState _ l _ _) = M.toAscList l
 
-remoteCommands :: CommandState -> 
-                  [(String, (Synopsis, PureCommandHandler))]
+-- | Dump the contents of the remote commands. Sorted in ascending
+-- order based on key
+remoteCommands :: CommandState -> [CommandHandlerEntry]
 remoteCommands (CommandState _ _ r _) = M.toAscList r
       
 -- | Create the empty state

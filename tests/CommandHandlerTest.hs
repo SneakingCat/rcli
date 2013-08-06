@@ -2,7 +2,7 @@ module CommandHandlerTest where
 
 import CommandLineGen
 import System.Console.RemoteCLI.CommandState (CommandState (..)
-                                              , Synopsis
+                                              , CommandHandlerEntry
                                               , Printout
                                               , PureCommandHandler
                                               , MonadicCommandHandler
@@ -52,9 +52,12 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
     Right ([], _, _) -> False
     Left _           -> False
     where
+      sorted :: [CommandHandlerEntry] -> Printout
       sorted             = map toLine . sortBy key
+      key :: CommandHandlerEntry -> CommandHandlerEntry -> Ordering
       key c1 c2          = fst c1 `compare` fst c2
-      toLine (c, (s, _)) = printf "%-20s%s" c s
+      toLine :: CommandHandlerEntry -> String
+      toLine (k, (s, _)) = printf "%-20s%s" k s
     
 -- | Help function to create a state where the given command is real,
 -- the others are generated dummies
@@ -66,8 +69,8 @@ stateWithLocal cmd =
   in CommandState <$> variables <*> locals <*> remotes <*> locals
   where
     realHandler = case lookup cmd localHandlers of
-      Just (s, h)  -> return (cmd, (s, h))
-      Nothing -> error $ "Cannot find handler " ++ cmd
+      Just (s, h) -> return (cmd, (s, h))
+      Nothing     -> error $ "Cannot find handler " ++ cmd
     dummyHandlers = filter (\(x, _) -> x /= cmd) <$> listOf handler
 
 -- | Generate a variable
@@ -75,7 +78,7 @@ variable :: Gen (String, Value)
 variable = (,) <$> identifier <*> value
 
 -- | Generate a handler
-handler :: Gen (String, (Synopsis, PureCommandHandler))
+handler :: Gen CommandHandlerEntry
 handler = (,) <$> identifier <*> ((,) <$> arbitrary <*> pure dummyHandler)
 
 -- | Apply a pure handler on the given command
