@@ -12,7 +12,6 @@ import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , fromList)
 import System.Console.RemoteCLI.CommandHandler (localHandlers)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..)
-                                             , Scope (..)
                                              , Value)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
@@ -26,9 +25,9 @@ data OnlyHelp = OnlyHelp CommandLine CommandState
 
 -- | Arbitrary generator for the OnlyHelp data type
 instance Arbitrary OnlyHelp where
-  arbitrary = OnlyHelp <$> elements [CommandLine Local "help" []
-                                    , CommandLine Default "help" []]
-                       <*> stateWithLocal "help"
+  arbitrary = OnlyHelp <$> commandLine <*> stateWithLocal "help"
+    where
+      commandLine = CommandLine <$> scope <*> pure "help" <*> pure []
       
 -- | The help command, not given any further argument
 prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool

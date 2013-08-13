@@ -1,5 +1,6 @@
 module CommandLineGen (
   arbitrary
+  , scope
   , identifier
   , value
   ) where
