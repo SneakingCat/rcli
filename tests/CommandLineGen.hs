@@ -2,6 +2,7 @@ module CommandLineGen (
   arbitrary
   , scope
   , identifier
+  , option
   , value
   ) where
 

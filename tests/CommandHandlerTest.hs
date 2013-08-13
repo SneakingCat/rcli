@@ -22,12 +22,24 @@ import Text.Printf (printf)
 -- help
 data OnlyHelp = OnlyHelp CommandLine CommandState
               deriving Show
+                       
+-- | Data type describing the erroneous help command
+data ErroneousHelp = ErroneousHelp CommandLine CommandState
+                   deriving Show
 
 -- | Arbitrary generator for the OnlyHelp data type
 instance Arbitrary OnlyHelp where
   arbitrary = OnlyHelp <$> commandLine <*> stateWithLocal "help"
     where
       commandLine = CommandLine <$> scope <*> pure "help" <*> pure []
+      
+-- | Arbitrary generator for ErroneousHelp data type      
+instance Arbitrary ErroneousHelp where
+  arbitrary = ErroneousHelp <$> tooManyOpts <*> stateWithLocal "help"
+    where
+      tooManyOpts = CommandLine <$> scope 
+                                <*> pure "help" 
+                                <*> ((:) <$> option <*> listOf1 option)
       
 -- | The help command, not given any further argument
 prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool
