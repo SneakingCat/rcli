@@ -19,5 +19,6 @@ tests = [
      ]
   , testGroup "CommandHandler tests" [
      testProperty "Help shall display all commands" prop_helpShallDisplayAllCommands
+     , testProperty "Help shall display error" prop_helpShallDisplayErrorMessage
      ]
   ]

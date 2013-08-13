@@ -70,6 +70,19 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
       toLine :: CommandHandlerEntry -> String
       toLine (k, (s, _)) = printf "%-20s%s" k s
     
+-- | The help command, with too many options
+prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool
+prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
+  case applyPureHandler commandLine state of
+    Right (x:y:[], _, _)
+      | numOpts commandLine > 1 ->
+        x == "Error: Too many options"
+        &&  y == "Usage: help <COMMAND>"
+      | otherwise               -> False
+    _                           -> False
+    where
+      numOpts (CommandLine _ _ opts) = length opts
+
 -- | Help function to create a state where the given command is real,
 -- the others are generated dummies
 stateWithLocal :: String -> Gen CommandState
