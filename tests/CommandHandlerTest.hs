@@ -35,12 +35,14 @@ instance Arbitrary OnlyHelp where
       
 -- | Arbitrary generator for ErroneousHelp data type      
 instance Arbitrary ErroneousHelp where
-  arbitrary = ErroneousHelp <$> tooManyOpts <*> stateWithLocal "help"
+  arbitrary = oneof [tooManyOpts]
     where
-      tooManyOpts = CommandLine <$> scope 
-                                <*> pure "help" 
-                                <*> ((:) <$> option <*> listOf1 option)
-      
+      tooManyOpts = ErroneousHelp <$>
+                        (CommandLine <$> scope
+                                    <*> pure "help"
+                                    <*> ((:) <$> option <*> listOf1 option))
+                                  <*> stateWithLocal "help"
+
 -- | The help command, not given any further argument
 prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool
 prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
