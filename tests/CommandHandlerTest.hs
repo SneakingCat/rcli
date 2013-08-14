@@ -12,6 +12,7 @@ import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , fromList)
 import System.Console.RemoteCLI.CommandHandler (localHandlers)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..)
+                                             , Option (..)
                                              , Value)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
@@ -29,7 +30,7 @@ data ErroneousHelp = ErroneousHelp CommandLine CommandState
 
 -- | Arbitrary generator for the OnlyHelp data type
 instance Arbitrary OnlyHelp where
-  arbitrary = OnlyHelp <$> commandLine <*> stateWithLocal "help"
+  arbitrary = OnlyHelp <$> commandLine <*> stateWithLocal "help" ""
     where
       commandLine = CommandLine <$> scope <*> pure "help" <*> pure []
       
@@ -37,11 +38,20 @@ instance Arbitrary OnlyHelp where
 instance Arbitrary ErroneousHelp where
   arbitrary = oneof [tooManyOpts]
     where
-      tooManyOpts = ErroneousHelp <$>
-                        (CommandLine <$> scope
-                                    <*> pure "help"
-                                    <*> ((:) <$> option <*> listOf1 option))
-                                  <*> stateWithLocal "help"
+      tooManyOpts = 
+        ErroneousHelp <$>
+            (CommandLine <$> scope
+                         <*> pure "help"
+                         <*> ((:) <$> option <*> listOf1 option))
+                      <*> stateWithLocal "help" ""
+      missingOpt = do
+        opt <- option
+        ErroneousHelp <$>
+            (CommandLine <$> scope 
+                         <*> pure "help" 
+                         <*> pure [opt])
+                      <*> stateWithLocal "help" (optName opt)
+      optName (Option name _) = name
 
 -- | The help command, not given any further argument
 prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool
@@ -76,19 +86,28 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
 prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool
 prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
   case applyPureHandler commandLine state of
-    Right (x:y:[], _, _)
+    Left (x:y:[])
       | numOpts commandLine > 1 ->
         x == "Error: Too many options"
         &&  y == "Usage: help <COMMAND>"
+      | hasOptArg commandLine      ->
+        x == "Error: Help option cannot have an argument"
+        && y == ""
       | otherwise               -> False
     _                           -> False
     where
-      numOpts (CommandLine _ _ opts) = length opts
+      numOpts (CommandLine _ _ opts)    = length opts
+      hasOptArg (CommandLine _ _ opts) = 
+        case head opts of
+          (Option _ (Just _)) -> True
+          _                   -> False
 
--- | Help function to create a state where the given command is real,
--- the others are generated dummies
-stateWithLocal :: String -> Gen CommandState
-stateWithLocal cmd = 
+-- | Help function to create a state where the given command is a real
+-- handler and the others are generated dummies. Also is there an
+-- exclusion argument to prevent that a specific dummy command will be
+-- present in the state
+stateWithLocal :: String -> String -> Gen CommandState
+stateWithLocal cmd excl = 
   let variables = fromList <$> listOf variable
       locals    = fromList <$> ((:) <$> realHandler <*> dummyHandlers)
       remotes   = fromList <$> dummyHandlers
@@ -97,7 +116,7 @@ stateWithLocal cmd =
     realHandler = case lookup cmd localHandlers of
       Just (s, h) -> return (cmd, (s, h))
       Nothing     -> error $ "Cannot find handler " ++ cmd
-    dummyHandlers = filter (\(x, _) -> x /= cmd) <$> listOf handler
+    dummyHandlers = filter (\(x, _) -> x /= cmd && x /= excl) <$> listOf handler
 
 -- | Generate a variable
 variable :: Gen (String, Value)

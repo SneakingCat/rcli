@@ -17,7 +17,7 @@ localHandlers = [("help", ("a synopsis", pureHelpHandler))]
 -- | The command handler for the "help" command
 pureHelpHandler :: PureCommandHandler
 pureHelpHandler commandLine state
-  | tooMany commandLine  = Right (errTooMany, state, monadicDoNothingHandler)
+  | tooMany commandLine  = Left errTooMany
   | otherwise            = Right (printout, state, monadicDoNothingHandler)
   where
     errTooMany  = "Error: Too many options":["Usage: help <COMMAND>"]
