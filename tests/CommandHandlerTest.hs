@@ -36,7 +36,7 @@ instance Arbitrary OnlyHelp where
       
 -- | Arbitrary generator for ErroneousHelp data type      
 instance Arbitrary ErroneousHelp where
-  arbitrary = oneof [tooManyOpts]
+  arbitrary = oneof [tooManyOpts, missingOpt]
     where
       tooManyOpts = 
         ErroneousHelp <$>
@@ -86,18 +86,18 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
 prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool
 prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
   case applyPureHandler commandLine state of
-    Left (x:y:[])
-      | numOpts commandLine > 1 ->
+    Left (x:y)
+      | nopts commandLine > 1 ->
         x == "Error: Too many options"
-        &&  y == "Usage: help <COMMAND>"
-      | hasOptArg commandLine      ->
-        x == "Error: Help option cannot have an argument"
-        && y == ""
-      | otherwise               -> False
-    _                           -> False
+        &&  y == ["Usage: help <COMMAND>"]
+      | optArg commandLine    ->
+        x == "Error: Help option cannot have argument"
+        && y == []
+      | otherwise             -> True
+    _                         -> True
     where
-      numOpts (CommandLine _ _ opts)    = length opts
-      hasOptArg (CommandLine _ _ opts) = 
+      nopts (CommandLine _ _ opts)  = length opts
+      optArg (CommandLine _ _ opts) = 
         case head opts of
           (Option _ (Just _)) -> True
           _                   -> False
