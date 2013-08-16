@@ -2,6 +2,7 @@
 module System.Console.RemoteCLI.CommandState (
   CommandState (..)
   , Synopsis
+  , Help
   , CommandHandlerEntry
   , Printout
   , MonadicCommandHandler
@@ -19,18 +20,25 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
 import Text.Printf (printf)
 import qualified Data.Map.Strict as M
 
+-- | The "Printout" type for the CLI, i.e. the content that will be
+-- displayed by the eval loop
+type Printout = [String]             
+
 -- | Alias for a string shortly describing the intention for a command
 type Synopsis            = String
+
+-- | Alias for the help information for the command
+type Help                = Printout
 
 -- | A map from strings to values
 type VariableMap         = M.Map String Value
 
 -- | A map from strings to command handlers
-type CommandHandlerMap   = M.Map String (Synopsis, PureCommandHandler)
+type CommandHandlerMap   = M.Map String (Synopsis, Help, PureCommandHandler)
 
 -- | A command handler entry as it will look like when dumping the
 -- contents of a command handler map
-type CommandHandlerEntry = (String, (Synopsis, PureCommandHandler))
+type CommandHandlerEntry = (String, (Synopsis, Help, PureCommandHandler))
 
 -- | The state for the CLI
 data CommandState = CommandState VariableMap       -- Variables
@@ -38,10 +46,6 @@ data CommandState = CommandState VariableMap       -- Variables
                                  CommandHandlerMap -- Remote command
                                  CommandHandlerMap -- Default scope
                   deriving (Eq, Show)
-
--- | The "Printout" type for the CLI, i.e. the content that will be
--- displayed by the eval loop
-type Printout = [String]             
              
 -- | A monadic function to take care of the 'dirty' aspects of command
 -- execution. E.g. network communication
@@ -70,8 +74,8 @@ lookupHandler :: CommandLine -> CommandState ->
                  Either [String] PureCommandHandler
 lookupHandler (CommandLine scope cmd _) (CommandState _ local _ deflt) =
   case M.lookup cmd (select scope) of
-    Nothing           -> Left [printf "Command \"%s\" not found" cmd]
-    Just (_, handler) -> Right handler
+    Nothing              -> Left [printf "Command \"%s\" not found" cmd]
+    Just (_, _, handler) -> Right handler
     where
       select Local = local
       select _     = deflt

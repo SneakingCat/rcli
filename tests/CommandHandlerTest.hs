@@ -80,7 +80,7 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
       key :: CommandHandlerEntry -> CommandHandlerEntry -> Ordering
       key c1 c2          = fst c1 `compare` fst c2
       toLine :: CommandHandlerEntry -> String
-      toLine (k, (s, _)) = printf "%-20s%s" k s
+      toLine (k, (s, _, _)) = printf "%-20s%s" k s
     
 -- | The help command, with too many options
 prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool
@@ -114,8 +114,8 @@ stateWithLocal cmd excl =
   in CommandState <$> variables <*> locals <*> remotes <*> locals
   where
     realHandler = case lookup cmd localHandlers of
-      Just (s, h) -> return (cmd, (s, h))
-      Nothing     -> error $ "Cannot find handler " ++ cmd
+      Just (s, h, f) -> return (cmd, (s, h, f))
+      Nothing        -> error $ "Cannot find handler " ++ cmd
     dummyHandlers = filter (\(x, _) -> x /= cmd && x /= excl) <$> listOf handler
 
 -- | Generate a variable
@@ -124,7 +124,10 @@ variable = (,) <$> identifier <*> value
 
 -- | Generate a handler
 handler :: Gen CommandHandlerEntry
-handler = (,) <$> identifier <*> ((,) <$> arbitrary <*> pure dummyHandler)
+handler = (,) <$> identifier 
+              <*> ((,,) <$> arbitrary 
+                        <*> arbitrary 
+                        <*> pure dummyHandler)
 
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 
