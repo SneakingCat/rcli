@@ -92,9 +92,11 @@ prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
       case commandLine of
         (CommandLine _ _ opts)
           | length opts > 1    ->
-              x == "Error: Too many options" && y == ["Usage: help <COMMAND>"]
+              x == "Error: Too many options" 
+              && y == ["Usage: help [COMMAND]"]
           | hasArg (head opts) ->
-              x == "Error: Help option cannot have argument" && y == []
+              x == "Error: Help option cannot have argument" 
+              && y == ["Usage: help [COMMAND]"]
           | otherwise          -> True
 --              x == "Error: Command \"" ++ optName (head opts) ++ "\" not found"
 --              && y == []

@@ -26,13 +26,14 @@ pureHelpHandler (CommandLine _ _ opts) state
   | length opts == 0      = Right (listAll, state, monadicDoNothingHandler)
   | otherwise             = Left ["!!"]
   where
-    tooManyOpts = "Error: Too many options":["Usage: help <COMMAND>"]
-    hasArgument = ["Error: Help option cannot have argument"]
+    tooManyOpts = "Error: Too many options":usage
+    hasArgument = "Error: Help option cannot have argument":usage
     listAll     = "The available commands are:":
                   (map lineInListing $ localCommands state) 
                     ++ (map lineInListing $ remoteCommands state)
     lineInListing (cmd, (synopsis, _, _)) = printf "%-20s%s" cmd synopsis
     hasArg (Option _ arg) = isJust arg
+    usage                 = ["Usage: help [COMMAND]"]
 
 -- | A monadic command handler that return the empty printout and the
 -- same state as given as input
