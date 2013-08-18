@@ -17,6 +17,7 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
 import Data.List (sortBy)
+import Data.Maybe (isJust)
 import Text.Printf (printf)
 
 -- | Data type describing the help command, without any arguments to
@@ -82,26 +83,27 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
       toLine :: CommandHandlerEntry -> String
       toLine (k, (s, _, _)) = printf "%-20s%s" k s
     
--- | The help command, with too many options
-prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool
+-- | The help command, with too many options or with a non existing
+-- command as option
+prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool    
 prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
   case applyPureHandler commandLine state of
-    Left (x:y)
-      | nopts commandLine > 1 ->
-        x == "Error: Too many options"
-        &&  y == ["Usage: help <COMMAND>"]
-      | optArg commandLine    ->
-        x == "Error: Help option cannot have argument"
-        && y == []
-      | otherwise             -> True
-    _                         -> True
+    Left (x:y) -> 
+      case commandLine of
+        (CommandLine _ _ opts)
+          | length opts > 1    ->
+              x == "Error: Too many options" && y == ["Usage: help <COMMAND>"]
+          | hasArg (head opts) ->
+              x == "Error: Help option cannot have argument" && y == []
+          | otherwise          -> True
+--              x == "Error: Command \"" ++ optName (head opts) ++ "\" not found"
+--              && y == []
+    Left []    -> False
+    Right _    -> True
     where
-      nopts (CommandLine _ _ opts)  = length opts
-      optArg (CommandLine _ _ opts) = 
-        case head opts of
-          (Option _ (Just _)) -> True
-          _                   -> False
-
+      hasArg  (Option _ arg)  = isJust arg
+      optName (Option name _) = name
+    
 -- | Help function to create a state where the given command is a real
 -- handler and the others are generated dummies. Also is there an
 -- exclusion argument to prevent that a specific dummy command will be

@@ -11,6 +11,7 @@ import System.Console.RemoteCLI.CommandState (Synopsis
                                               , localCommands
                                               , remoteCommands)
 import Text.Printf (printf)
+import Data.Maybe (isJust)
       
 -- | Export all local handlers defined in this module
 localHandlers :: [(String, (Synopsis, Help, PureCommandHandler))]
@@ -18,23 +19,20 @@ localHandlers = [("help", ("a synopsis", helpOnHelp, pureHelpHandler))]
 
 -- | The command handler for the "help" command
 pureHelpHandler :: PureCommandHandler
-pureHelpHandler commandLine state
-  | nopts commandLine > 1   = Left errTooManyOpts
-  | nopts commandLine == 1
-    && optArg commandLine   = Left errHasOptArg
-  | otherwise               = Right (printout, state, monadicDoNothingHandler)
+pureHelpHandler (CommandLine _ _ opts) state
+  | length opts > 1       = Left tooManyOpts
+  | length opts == 1 
+    && hasArg (head opts) = Left hasArgument
+  | length opts == 0      = Right (listAll, state, monadicDoNothingHandler)
+  | otherwise             = Left ["!!"]
   where
-    errTooManyOpts = "Error: Too many options":["Usage: help <COMMAND>"]
-    errHasOptArg   = ["Error: Help option cannot have argument"]
-    printout       = header:(map toLine $ localCommands state)
-                     ++ (map toLine $ remoteCommands state)
-    header         = "The available commands are:"
-    toLine (cmd, (synopsis, _, _))    = printf "%-20s%s" cmd synopsis
-    nopts (CommandLine _ _ opts)   = length opts
-    optArg (CommandLine _ _ opts)  =
-      case head opts of
-        (Option _ (Just _)) -> True
-        _                   -> False
+    tooManyOpts = "Error: Too many options":["Usage: help <COMMAND>"]
+    hasArgument = ["Error: Help option cannot have argument"]
+    listAll     = "The available commands are:":
+                  (map lineInListing $ localCommands state) 
+                    ++ (map lineInListing $ remoteCommands state)
+    lineInListing (cmd, (synopsis, _, _)) = printf "%-20s%s" cmd synopsis
+    hasArg (Option _ arg) = isJust arg
 
 -- | A monadic command handler that return the empty printout and the
 -- same state as given as input
