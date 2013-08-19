@@ -74,9 +74,9 @@ pHelpShallDisplayAllCommands (OnlyHelp commandLine state) =
     Left _           -> False
     where
       sorted :: [CommandHandlerEntry] -> Printout
-      sorted             = map toLine . sortBy key
+      sorted                = map toLine . sortBy key
       key :: CommandHandlerEntry -> CommandHandlerEntry -> Ordering
-      key c1 c2          = fst c1 `compare` fst c2
+      key c1 c2             = fst c1 `compare` fst c2
       toLine :: CommandHandlerEntry -> String
       toLine (k, (s, _, _)) = printf "%-20s%s" k s
     
@@ -85,18 +85,18 @@ pHelpShallDisplayAllCommands (OnlyHelp commandLine state) =
 pHelpShallDisplayErrorMessage :: ErroneousHelp -> Bool    
 pHelpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
   case applyPureHandler commandLine state of
-    Left (x:y) -> 
+    Left (x:xs) -> 
       case commandLine of
         (CommandLine _ _ opts)
           | length opts > 1    ->
               x == "Error: Too many options" 
-              && y == ["Usage: help [COMMAND]"]
+              && xs == ["Usage: help [COMMAND]"]
           | hasArg (head opts) ->
               x == "Error: Help option cannot have argument" 
-              && y == ["Usage: help [COMMAND]"]
+              && xs == ["Usage: help [COMMAND]"]
           | otherwise          ->
               x == "Error: Command \"" ++ optName (head opts) ++ "\" not found"
-              && y == []
+              && xs == []
               
     _          -> False
   where
