@@ -1,19 +1,16 @@
 module CommandHandlerTest where
 
 import CommandLineGen
+import CommandStateGen
 import System.Console.RemoteCLI.CommandState (CommandState (..)
                                               , CommandHandlerEntry
                                               , Printout
-                                              , PureCommandHandler
                                               , MonadicCommandHandler
                                               , lookupHandler
                                               , localCommands
-                                              , remoteCommands
-                                              , fromList)
-import System.Console.RemoteCLI.CommandHandler (localHandlers)
+                                              , remoteCommands)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..)
-                                             , Option (..)
-                                             , Value)
+                                             , Option (..))
 import Test.QuickCheck
 import Control.Applicative ((<$>), (<*>), pure)
 import Data.List (sortBy)
@@ -106,33 +103,6 @@ prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
       hasArg  (Option _ arg)  = isJust arg
       optName (Option name _) = name
     
--- | Help function to create a state where the given command is a real
--- handler and the others are generated dummies. Also is there an
--- exclusion argument to prevent that a specific dummy command will be
--- present in the state
-stateWithLocal :: String -> String -> Gen CommandState
-stateWithLocal cmd excl = 
-  let variables = fromList <$> listOf variable
-      locals    = fromList <$> ((:) <$> realHandler <*> dummyHandlers)
-      remotes   = fromList <$> dummyHandlers
-  in CommandState <$> variables <*> locals <*> remotes <*> locals
-  where
-    realHandler = case lookup cmd localHandlers of
-      Just (s, h, f) -> return (cmd, (s, h, f))
-      Nothing        -> error $ "Cannot find handler " ++ cmd
-    dummyHandlers = filter (\(x, _) -> x /= cmd && x /= excl) <$> listOf handler
-
--- | Generate a variable
-variable :: Gen (String, Value)
-variable = (,) <$> identifier <*> value
-
--- | Generate a handler
-handler :: Gen CommandHandlerEntry
-handler = (,) <$> identifier 
-              <*> ((,,) <$> arbitrary 
-                        <*> arbitrary 
-                        <*> pure dummyHandler)
-
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 
                     Either Printout (Printout
@@ -141,7 +111,4 @@ applyPureHandler :: CommandLine -> CommandState ->
 applyPureHandler commandLine state = do
   pureHandler <- lookupHandler commandLine state
   pureHandler commandLine state
-  
--- | A dummy command handler. Shall never be executed
-dummyHandler :: PureCommandHandler
-dummyHandler _ _ = error "Dummy handler. Shall never be called."
+
