@@ -7,6 +7,7 @@ module System.Console.RemoteCLI.CommandState (
   , Printout
   , MonadicCommandHandler
   , PureCommandHandler
+  , lookupEntry
   , lookupHandler
   , localCommands
   , remoteCommands
@@ -68,6 +69,10 @@ instance Eq PureCommandHandler where
 instance Show PureCommandHandler where
   show _ = "PureCommandHandler"  
            
+-- | Lookup a command entry. Will search the command from both scopes
+lookupEntry :: String -> CommandState -> Maybe CommandHandlerEntry
+lookupEntry _ _ = Nothing
+
 -- | Lookup the pure handler for the given command line and its
 -- selected scope
 lookupHandler :: CommandLine -> CommandState -> 

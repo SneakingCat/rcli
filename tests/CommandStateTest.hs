@@ -2,6 +2,7 @@ module CommandStateTest where
 
 import CommandLineGen ()
 import System.Console.RemoteCLI.CommandState (lookupHandler
+                                              , lookupEntry
                                               , empty)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..))
 
@@ -14,3 +15,8 @@ prop_commandNotFoundOnEmpty commandLine =
     _          -> False
     where
       name (CommandLine _ n _) = n
+      
+-- | When the state is empty, the requested command entry shall not be
+-- found in none of the scopes
+prop_entryNotFoundOnEmpty :: String -> Bool
+prop_entryNotFoundOnEmpty cmd = Nothing == lookupEntry cmd empty
