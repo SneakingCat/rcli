@@ -22,5 +22,6 @@ tests = [
   , testGroup "CommandHandler" [
      testProperty "Help shall display all commands" pHelpShallDisplayAllCommands
      , testProperty "Help shall display error" pHelpShallDisplayErrorMessage
+     , testProperty "Help shall display printout" pHelpShallDisplayHelpPrintout
      ]
   ]

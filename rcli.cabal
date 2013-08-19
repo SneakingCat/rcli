@@ -17,7 +17,7 @@ test-suite rcli-tests
   x-used-tf:           true
   main-is:             TestMain.hs
   hs-source-dirs:      src, tests
-  ghc-options:         -Wall -fno-warn-orphans
+  ghc-options:         -Wall -fno-warn-orphans -O2
   build-depends:       base >= 4 && < 5
                        , test-framework
                        , test-framework-quickcheck2
@@ -32,7 +32,7 @@ executable rcli
                        , System.Console.RemoteCLI.Executor
                        , System.Console.RemoteCLI.CommandLine
   hs-source-dirs:      src
-  ghc-options:         -Wall
+  ghc-options:         -Wall -O2
   build-depends:       base >= 4 && < 5
                        , parsec
                        , mtl

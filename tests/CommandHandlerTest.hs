@@ -22,6 +22,11 @@ import Text.Printf (printf)
 data OnlyHelp = OnlyHelp CommandLine CommandState
               deriving Show
                        
+-- | Data type describing the help command given a well formed and
+-- existing command
+data HelpOnCommand = HelpOnCommand Printout CommandLine CommandState
+                   deriving Show
+
 -- | Data type describing the erroneous help command
 data ErroneousHelp = ErroneousHelp CommandLine CommandState
                    deriving Show
@@ -32,6 +37,16 @@ instance Arbitrary OnlyHelp where
     where
       commandLine = CommandLine <$> scope <*> pure "help" <*> pure []
       
+instance Arbitrary HelpOnCommand where
+  arbitrary = do
+    entry@(cmd, (_, printout, _)) <- handler
+    HelpOnCommand <$> pure printout <*> commandLine cmd <*> state entry
+    where
+      commandLine cmd = CommandLine <$> scope 
+                                    <*> pure "help" 
+                                    <*> pure [(Option cmd Nothing)]
+      state entry = stateWithLocalAndDummy "help" entry
+
 -- | Arbitrary generator for ErroneousHelp data type      
 instance Arbitrary ErroneousHelp where
   arbitrary = oneof [tooManyOpts, missingOpt]
@@ -80,6 +95,12 @@ pHelpShallDisplayAllCommands (OnlyHelp commandLine state) =
       toLine :: CommandHandlerEntry -> String
       toLine (k, (s, _, _)) = printf "%-20s%s" k s
     
+pHelpShallDisplayHelpPrintout :: HelpOnCommand -> Bool
+pHelpShallDisplayHelpPrintout (HelpOnCommand printout commandLine state) =
+  case applyPureHandler commandLine state of
+    Right (x, state', _) -> x == printout && state' == state
+    _                    -> False
+
 -- | The help command, with too many options or with a non existing
 -- command as option
 pHelpShallDisplayErrorMessage :: ErroneousHelp -> Bool    
