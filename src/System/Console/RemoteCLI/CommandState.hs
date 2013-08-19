@@ -20,6 +20,7 @@ import System.Console.RemoteCLI.CommandLine (CommandLine (..)
                                              , Value)
 import Text.Printf (printf)
 import qualified Data.Map.Strict as M
+import Control.Monad (mplus)
 
 -- | The "Printout" type for the CLI, i.e. the content that will be
 -- displayed by the eval loop
@@ -71,7 +72,10 @@ instance Show PureCommandHandler where
            
 -- | Lookup a command entry. Will search the command from both scopes
 lookupEntry :: String -> CommandState -> Maybe CommandHandlerEntry
-lookupEntry _ _ = Nothing
+lookupEntry cmd (CommandState _ local remote _) =
+  case M.lookup cmd local `mplus` M.lookup cmd remote of
+    Just e  -> Just (cmd, e)
+    Nothing -> Nothing
 
 -- | Lookup the pure handler for the given command line and its
 -- selected scope

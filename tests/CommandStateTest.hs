@@ -1,10 +1,24 @@
 module CommandStateTest where
 
-import CommandLineGen ()
-import System.Console.RemoteCLI.CommandState (lookupHandler
+import CommandLineGen
+import CommandStateGen
+import Test.QuickCheck
+import System.Console.RemoteCLI.CommandState (CommandState
+                                              , CommandHandlerEntry
+                                              , lookupHandler
                                               , lookupEntry
                                               , empty)
 import System.Console.RemoteCLI.CommandLine (CommandLine (..))
+
+-- | Wrapper data type to generate data to entry lookup test case
+data ToBeFoundEntry = ToBeFoundEntry String CommandHandlerEntry CommandState
+                    deriving Show
+                             
+instance Arbitrary ToBeFoundEntry where
+  arbitrary = do
+    entry@(cmd, _) <- handler
+    state          <- stateWithDummy entry
+    return $ ToBeFoundEntry cmd entry state
 
 -- | When the state is empty, the string "Command "X" not found"
 -- always shall be returned when looking up the handle
@@ -20,3 +34,11 @@ prop_commandNotFoundOnEmpty commandLine =
 -- found in none of the scopes
 prop_entryNotFoundOnEmpty :: String -> Bool
 prop_entryNotFoundOnEmpty cmd = Nothing == lookupEntry cmd empty
+
+-- | With the pre-populated state the command shall be found and equal
+-- to the provided entry
+prop_entryShallBeFoundAndEqual :: ToBeFoundEntry -> Bool
+prop_entryShallBeFoundAndEqual (ToBeFoundEntry cmd entry state) =
+  case lookupEntry cmd state of
+    Just entry' -> entry' == entry
+    Nothing     -> False
