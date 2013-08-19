@@ -94,14 +94,14 @@ pHelpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
           | hasArg (head opts) ->
               x == "Error: Help option cannot have argument" 
               && y == ["Usage: help [COMMAND]"]
-          | otherwise          -> True
---              x == "Error: Command \"" ++ optName (head opts) ++ "\" not found"
---              && y == []
-    Left []    -> False
-    Right _    -> True
-    where
-      hasArg  (Option _ arg)  = isJust arg
-      optName (Option name _) = name
+          | otherwise          ->
+              x == "Error: Command \"" ++ optName (head opts) ++ "\" not found"
+              && y == []
+              
+    _          -> False
+  where
+     hasArg  (Option _ arg)  = isJust arg
+     optName (Option name _) = name
     
 -- | Apply a pure handler on the given command
 applyPureHandler :: CommandLine -> CommandState -> 

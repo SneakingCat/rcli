@@ -8,6 +8,7 @@ import System.Console.RemoteCLI.CommandState (Synopsis
                                               , Help
                                               , PureCommandHandler
                                               , MonadicCommandHandler
+                                              , lookupEntry
                                               , localCommands
                                               , remoteCommands)
 import Text.Printf (printf)
@@ -24,16 +25,23 @@ pureHelpHandler (CommandLine _ _ opts) state
   | length opts == 1 
     && hasArg (head opts) = Left hasArgument
   | length opts == 0      = Right (listAll, state, monadicDoNothingHandler)
-  | otherwise             = Left ["!!"]
+  | otherwise             =
+    let name = optName (head opts)
+    in
+     case lookupEntry name state of
+       Just (_, (_, help, _)) -> Right (help, state, monadicDoNothingHandler)
+       Nothing                -> Left $ notFound name
   where
+    notFound x  = [printf "Error: Command \"%s\" not found" x]
     tooManyOpts = "Error: Too many options":usage
     hasArgument = "Error: Help option cannot have argument":usage
     listAll     = "The available commands are:":
                   (map lineInListing $ localCommands state) 
                     ++ (map lineInListing $ remoteCommands state)
     lineInListing (cmd, (synopsis, _, _)) = printf "%-20s%s" cmd synopsis
-    hasArg (Option _ arg) = isJust arg
-    usage                 = ["Usage: help [COMMAND]"]
+    hasArg (Option _ arg)   = isJust arg
+    optName (Option name _) = name
+    usage                   = ["Usage: help [COMMAND]"]
 
 -- | A monadic command handler that return the empty printout and the
 -- same state as given as input
