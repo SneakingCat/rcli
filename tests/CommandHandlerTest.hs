@@ -52,8 +52,8 @@ instance Arbitrary ErroneousHelp where
       optName (Option name _) = name
 
 -- | The help command, not given any further argument
-prop_helpShallDisplayAllCommands :: OnlyHelp -> Bool
-prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
+pHelpShallDisplayAllCommands :: OnlyHelp -> Bool
+pHelpShallDisplayAllCommands (OnlyHelp commandLine state) =
   case applyPureHandler commandLine state of
     Right (x:xs, state', _) -> 
       -- The first row shall read
@@ -82,8 +82,8 @@ prop_helpShallDisplayAllCommands (OnlyHelp commandLine state) =
     
 -- | The help command, with too many options or with a non existing
 -- command as option
-prop_helpShallDisplayErrorMessage :: ErroneousHelp -> Bool    
-prop_helpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
+pHelpShallDisplayErrorMessage :: ErroneousHelp -> Bool    
+pHelpShallDisplayErrorMessage (ErroneousHelp commandLine state) =
   case applyPureHandler commandLine state of
     Left (x:y) -> 
       case commandLine of

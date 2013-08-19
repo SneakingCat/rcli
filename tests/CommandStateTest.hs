@@ -22,8 +22,8 @@ instance Arbitrary ToBeFoundEntry where
 
 -- | When the state is empty, the string "Command "X" not found"
 -- always shall be returned when looking up the handle
-prop_commandNotFoundOnEmpty :: CommandLine -> Bool
-prop_commandNotFoundOnEmpty commandLine =
+pCommandNotFoundOnEmpty :: CommandLine -> Bool
+pCommandNotFoundOnEmpty commandLine =
   case lookupHandler commandLine empty of
     Left [err] -> err == "Command " ++ show (name commandLine) ++ " not found"
     _          -> False
@@ -32,13 +32,13 @@ prop_commandNotFoundOnEmpty commandLine =
       
 -- | When the state is empty, the requested command entry shall not be
 -- found in none of the scopes
-prop_entryNotFoundOnEmpty :: String -> Bool
-prop_entryNotFoundOnEmpty cmd = Nothing == lookupEntry cmd empty
+pEntryNotFoundOnEmpty :: String -> Bool
+pEntryNotFoundOnEmpty cmd = Nothing == lookupEntry cmd empty
 
 -- | With the pre-populated state the command shall be found and equal
 -- to the provided entry
-prop_entryShallBeFoundAndEqual :: ToBeFoundEntry -> Bool
-prop_entryShallBeFoundAndEqual (ToBeFoundEntry cmd entry state) =
+pEntryShallBeFoundAndEqual :: ToBeFoundEntry -> Bool
+pEntryShallBeFoundAndEqual (ToBeFoundEntry cmd entry state) =
   case lookupEntry cmd state of
     Just entry' -> entry' == entry
     Nothing     -> False

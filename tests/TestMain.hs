@@ -11,16 +11,16 @@ main = defaultMain tests
 
 tests :: [Test]
 tests = [
-  testGroup "CommandLine tests"  [
-     testProperty "Equality when converting formats" prop_fromAndToShallBeEqual
+  testGroup "CommandLine"  [
+     testProperty "Equality when converting formats" pFromAndToShallBeEqual
      ]
-  , testGroup "CommandState tests" [
-     testProperty "Command not found on empty state" prop_commandNotFoundOnEmpty
-     , testProperty "Entry not found on empty state" prop_entryNotFoundOnEmpty
-     , testProperty "Entry shall be found and equal" prop_entryShallBeFoundAndEqual
+  , testGroup "CommandState" [
+     testProperty "Command not found on empty state" pCommandNotFoundOnEmpty
+     , testProperty "Entry not found on empty state" pEntryNotFoundOnEmpty
+     , testProperty "Entry shall be found and equal" pEntryShallBeFoundAndEqual
      ]
-  , testGroup "CommandHandler tests" [
-     testProperty "Help shall display all commands" prop_helpShallDisplayAllCommands
-     , testProperty "Help shall display error" prop_helpShallDisplayErrorMessage
+  , testGroup "CommandHandler" [
+     testProperty "Help shall display all commands" pHelpShallDisplayAllCommands
+     , testProperty "Help shall display error" pHelpShallDisplayErrorMessage
      ]
   ]
