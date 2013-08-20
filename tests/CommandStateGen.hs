@@ -23,13 +23,11 @@ import System.Console.RemoteCLI.CommandLine (Value)
 stateWithLocal :: String -> String -> Gen CommandState
 stateWithLocal cmd excl = 
   let variables = fromList <$> listOf variable
-      locals    = fromList <$> ((:) <$> realHandler <*> dummyHandlers)
+      locals    = fromList <$> ((:) <$> pure (realHandler cmd) 
+                                    <*> dummyHandlers)
       remotes   = fromList <$> dummyHandlers
   in CommandState <$> variables <*> locals <*> remotes <*> locals
   where
-    realHandler = case lookup cmd localHandlers of
-      Just (s, h, f) -> return (cmd, (s, h, f))
-      Nothing        -> error $ "Cannot find handler " ++ cmd
     dummyHandlers = filter (\(x, _) -> x /= cmd && x /= excl) <$> listOf handler
 
 -- | Help function to create a state where the given command is
@@ -46,13 +44,11 @@ stateWithDummy entry =
 stateWithLocalAndDummy :: String -> CommandHandlerEntry -> Gen CommandState
 stateWithLocalAndDummy cmd entry@(name, _) =
   let variables = fromList <$> listOf variable
-      locals    = fromList <$> ((:) <$> realHandler <*> dummyHandlers)
+      locals    = fromList <$> ((:) <$> pure (realHandler cmd) 
+                                    <*> dummyHandlers)
       remotes   = fromList <$> ((:) <$> pure entry <*> dummyHandlers)
   in CommandState <$> variables <*> locals <*> remotes <*> locals
   where
-    realHandler = case lookup cmd localHandlers of
-      Just (s, h, f) -> return (cmd, (s, h, f))
-      Nothing        -> error $ "Cannot find handler " ++ cmd
     dummyHandlers = filter (\(x, _) -> x /= cmd && x /= name) <$> listOf handler
 
 -- | Generate a variable
@@ -66,6 +62,13 @@ handler = (,) <$> identifier
                         <*> arbitrary 
                         <*> pure dummyHandler)
               
+-- | Read the specified handler from the real command handler
+realHandler :: String -> CommandHandlerEntry
+realHandler cmd = 
+  case lookup cmd localHandlers of
+    Just e  -> (cmd, e)
+    Nothing -> error $ "Cannot find handler " ++ cmd
+
 -- | A dummy command handler. Shall never be executed
 dummyHandler :: PureCommandHandler
 dummyHandler _ _ = error "Dummy handler. Shall never be called."
